@@ -76,6 +76,40 @@ class Group {
   playerPlayedAllMatches(player) {
     return player.matchCount === this.players.length - 1;
   }
+
+  playerCell(player) {
+    return `<td>${player.name}${
+      this.playerPlayedAllMatches(player) ? "&nbsp;👏" : ""
+    }</td>`;
+  }
+
+  row() {
+    return `		<tr>
+			<td><strong>${this.number}</strong></td>
+			${this.playerCell(this.players[0])}
+			${this.playerCell(this.players[1])}
+			<td>${this.actualMatchCount} of ${this.maxMatchCount()}${
+      this.playedAllMatches() ? "&nbsp;😁" : ""
+    }</td>
+		</tr>`;
+  }
 }
 
-const groups = (await Group.getAll()).sort((a, b) => a.number - b.number);
+async function seasonTable() {
+  const groups = (await Group.getAll()).sort((a, b) => a.number - b.number);
+
+  return `
+<table border="1" cellpadding="0" cellspacing="0" style="width:fit-content; max-width:100%">
+	<tbody>
+		<tr>
+			<td><strong>Box</strong></td>
+			<td><strong>Winner&nbsp;🥇</strong></td>
+			<td><strong>Runner up&nbsp;🥈</strong></td>
+			<td><strong>Matches played</strong></td>
+		</tr>
+${groups.map((group) => group.row()).join("\n")}
+	</tbody>
+</table>`;
+}
+
+console.log(await seasonTable());

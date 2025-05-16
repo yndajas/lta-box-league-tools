@@ -2,6 +2,10 @@ class Player {
   constructor(playerRow) {
     this.name = playerRow.querySelector(".nav-link__value").textContent;
     this.matchCount = Player.matchCount(playerRow);
+    this.rank = Number.parseInt(
+      playerRow.querySelector(".standing-status").textContent,
+      10
+    );
   }
 
   static matchCount(playerRow) {
@@ -90,17 +94,24 @@ class Group {
     return player.matchCount === this.players.length - 1;
   }
 
-  playerCell(player) {
-    return `<td>${player.name}${
+  playerText(player) {
+    return `${player.name}${
       this.playerPlayedAllMatches(player) ? "&nbsp;👏" : ""
-    }</td>`;
+    }`;
+  }
+
+  rankCell(rank) {
+    const players = this.players.filter((player) => player.rank === rank);
+    return `<td>${new Intl.ListFormat("en").format(
+      players.map((player) => this.playerText(player))
+    )}</td>`;
   }
 
   row() {
     return `		<tr>
 			<td><strong>${this.number}</strong></td>
-			${this.playerCell(this.players[0])}
-			${this.playerCell(this.players[1])}
+			${this.rankCell(1)}
+			${this.rankCell(2)}
 			<td>${this.actualMatchCount} of ${this.maxMatchCount()}${
       this.playedAllMatches() ? "&nbsp;😁" : ""
     }</td>

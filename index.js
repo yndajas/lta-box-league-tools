@@ -1,7 +1,11 @@
 class Player {
   constructor(playerRow) {
     this.name = playerRow.querySelector(".nav-link__value").textContent;
-    this.matchCount = Number.parseInt(
+    this.matchCount = Player.matchCount(playerRow);
+  }
+
+  static matchCount(playerRow) {
+    return Number.parseInt(
       playerRow.querySelector(".cell-points").textContent.trim(),
       10
     );
@@ -30,9 +34,18 @@ class Group {
       10
     );
 
-    this.players = Array.from(loadedGroupNode.querySelectorAll("tbody tr")).map(
-      (playerRow) => new Player(playerRow)
-    );
+    this.players = Array.from(loadedGroupNode.querySelectorAll("tbody tr"))
+      .map((playerRow) => {
+        if (
+          playerRow.querySelector('s[title="Withdrawn"]') &&
+          Player.matchCount(playerRow) === 0
+        ) {
+          return null;
+        }
+
+        return new Player(playerRow);
+      })
+      .filter((player) => player);
   }
 
   static async get(groupNode) {

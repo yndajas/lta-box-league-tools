@@ -126,9 +126,15 @@ class GroupSeasonTableRowPresenter {
   }
 }
 
-async function seasonTable() {
-  const groups = (await Group.getAll()).sort((a, b) => a.number - b.number);
+let groups;
 
+async function populatedGroups() {
+  groups ||= (await Group.getAll()).sort((a, b) => a.number - b.number);
+
+  return groups;
+}
+
+async function seasonTable() {
   return `
 <table border="1" cellpadding="0" cellspacing="0" style="width:fit-content; max-width:100%">
 	<tbody>
@@ -138,7 +144,7 @@ async function seasonTable() {
 			<td><strong>Runner up&nbsp;🥈</strong></td>
 			<td><strong>Matches played</strong></td>
 		</tr>
-${groups.map((group) => new GroupSeasonTableRowPresenter(group).present()).join("\n")}
+${(await populatedGroups()).map((group) => new GroupSeasonTableRowPresenter(group).present()).join("\n")}
 	</tbody>
 </table>`;
 }

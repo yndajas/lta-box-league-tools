@@ -94,28 +94,35 @@ class Group {
     return player.matchCount === this.players.length - 1;
   }
 
+}
+
+class GroupSeasonTableRowPresenter {
+  constructor(group) {
+    this.group = group
+  }
+
   playerText(player) {
     return `${player.name}${
-      this.playerPlayedAllMatches(player) ? "&nbsp;👏" : ""
+      this.group.playerPlayedAllMatches(player) ? "&nbsp;👏" : ""
     }`;
   }
 
+  present() {
+    return `		<tr>
+			<td><strong>${this.group.number}</strong></td>
+			${this.rankCell(1)}
+			${this.rankCell(2)}
+			<td>${this.actualMatchCount} of ${this.group.maxMatchCount()}${
+      this.group.playedAllMatches() ? "&nbsp;😁" : ""
+    }</td>
+		</tr>`;
+  }
+
   rankCell(rank) {
-    const players = this.players.filter((player) => player.rank === rank);
+    const players = this.group.players.filter((player) => player.rank === rank);
     return `<td>${new Intl.ListFormat("en").format(
       players.map((player) => this.playerText(player))
     )}</td>`;
-  }
-
-  row() {
-    return `		<tr>
-			<td><strong>${this.number}</strong></td>
-			${this.rankCell(1)}
-			${this.rankCell(2)}
-			<td>${this.actualMatchCount} of ${this.maxMatchCount()}${
-      this.playedAllMatches() ? "&nbsp;😁" : ""
-    }</td>
-		</tr>`;
   }
 }
 
@@ -131,7 +138,7 @@ async function seasonTable() {
 			<td><strong>Runner up&nbsp;🥈</strong></td>
 			<td><strong>Matches played</strong></td>
 		</tr>
-${groups.map((group) => group.row()).join("\n")}
+${groups.map((group) => new GroupSeasonTableRowPresenter(group).present()).join("\n")}
 	</tbody>
 </table>`;
 }

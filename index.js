@@ -4,14 +4,14 @@ class Player {
     this.matchCount = Player.matchCount(playerRow);
     this.rank = Number.parseInt(
       playerRow.querySelector(".standing-status").textContent,
-      10
+      10,
     );
   }
 
   static matchCount(playerRow) {
     return Number.parseInt(
       playerRow.querySelector(".cell-points").textContent.trim(),
-      10
+      10,
     );
   }
 }
@@ -20,37 +20,36 @@ class Match {
   constructor(matchItem) {
     this.date = matchItem
       .querySelector(".match__footer")
-      .innerText
-      .substring(4)
+      .innerText.substring(4)
       .split("/")
       .reverse()
       .join("-");
 
-    this.winner = matchItem
-      .querySelector(".match__row.has-won .match__row-title").innerText;
-    this.loser = matchItem
-      .querySelector(".match__row:not(.has-won) .match__row-title")
-      .innerText;
+    this.winner = matchItem.querySelector(
+      ".match__row.has-won .match__row-title",
+    ).innerText;
+    this.loser = matchItem.querySelector(
+      ".match__row:not(.has-won) .match__row-title",
+    ).innerText;
 
     const playerTwoWon = matchItem
       .querySelector(".match__row:nth-child(2)")
-      .classList
-      .contains("has-won");
+      .classList.contains("has-won");
 
-    this.setScores = Array
-      .from(matchItem.querySelectorAll(".match__result .points"))
-      .map((setGameCountList) => {
-        let gameCounts = Array
-          .from(setGameCountList.querySelectorAll(".points__cell"))
-          .map((setGameCountItem) => setGameCountItem.innerText);
+    this.setScores = Array.from(
+      matchItem.querySelectorAll(".match__result .points"),
+    ).map((setGameCountList) => {
+      let gameCounts = Array.from(
+        setGameCountList.querySelectorAll(".points__cell"),
+      ).map((setGameCountItem) => setGameCountItem.innerText);
 
-        if (playerTwoWon) gameCounts.reverse();
+      if (playerTwoWon) gameCounts.reverse();
 
-        return gameCounts;
-      });
+      return gameCounts;
+    });
 
     this.playerRetired = Array.from(
-      matchItem.querySelectorAll(".match__row .match__message")
+      matchItem.querySelectorAll(".match__row .match__message"),
     ).some((messageElement) => messageElement.innerText === "Retired");
   }
 }
@@ -66,7 +65,7 @@ class Group {
         .querySelector(".module__title-main")
         .textContent.trim()
         .split(" ")[1],
-      10
+      10,
     );
 
     this.actualMatchCount = Number.parseInt(
@@ -74,7 +73,7 @@ class Group {
         .querySelector(".js-edit-match-index .module-divider")
         .textContent.trim()
         .match(/[0-9]+/)[0],
-      10
+      10,
     );
 
     this.players = Array.from(loadedGroupNode.querySelectorAll("tbody tr"))
@@ -90,14 +89,11 @@ class Group {
       })
       .filter((player) => player);
 
-    this.matches = Array
-      .from(
-        loadedGroupNode
-          .querySelectorAll(
-            ".module-container.js-edit-match-index .match-group__item"
-          )
-      )
-      .map((matchItem) => new Match(matchItem));
+    this.matches = Array.from(
+      loadedGroupNode.querySelectorAll(
+        ".module-container.js-edit-match-index .match-group__item",
+      ),
+    ).map((matchItem) => new Match(matchItem));
   }
 
   static async get(groupNode) {
@@ -147,8 +143,8 @@ class Group {
   static async getAll() {
     return Promise.all(
       Array.from(document.querySelectorAll("div.js-edit-match-group")).map(
-        (groupNode) => this.get(groupNode)
-      )
+        (groupNode) => this.get(groupNode),
+      ),
     );
   }
 
@@ -163,12 +159,11 @@ class Group {
   playerPlayedAllMatches(player) {
     return player.matchCount === this.players.length - 1;
   }
-
 }
 
 class GroupSeasonTableRowPresenter {
   constructor(group) {
-    this.group = group
+    this.group = group;
   }
 
   playerText(player) {
@@ -183,15 +178,15 @@ class GroupSeasonTableRowPresenter {
 			${this.rankCell(1)}
 			${this.rankCell(2)}
 			<td>${this.actualMatchCount} of ${this.group.maxMatchCount()}${
-      this.group.playedAllMatches() ? "&nbsp;😁" : ""
-    }</td>
+        this.group.playedAllMatches() ? "&nbsp;😁" : ""
+      }</td>
 		</tr>`;
   }
 
   rankCell(rank) {
     const players = this.group.players.filter((player) => player.rank === rank);
     return `<td>${new Intl.ListFormat("en").format(
-      players.map((player) => this.playerText(player))
+      players.map((player) => this.playerText(player)),
     )}</td>`;
   }
 }
@@ -203,12 +198,13 @@ class GroupResultsCsvRowsPresenter {
 
   present() {
     return this.group.matches.map((match) => {
-      let score = match
-        .setScores
+      let score = match.setScores
         .map((gameCounts) => gameCounts.join("-"))
         .join(" ");
 
-      if (match.playerRetired) { score += " (retired)" }
+      if (match.playerRetired) {
+        score += " (retired)";
+      }
 
       return [match.date, this.group.number, match.winner, match.loser, score];
     });
@@ -247,7 +243,6 @@ async function resultsCsv() {
 
   return csvRows.join("\n");
 }
-
 
 console.log(await seasonTable());
 console.log(await resultsCsv());

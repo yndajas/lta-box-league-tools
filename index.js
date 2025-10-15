@@ -16,6 +16,45 @@ class Player {
   }
 }
 
+class Match {
+  constructor(matchItem) {
+    this.date = matchItem
+      .querySelector(".match__footer")
+      .innerText
+      .substring(4)
+      .split("/")
+      .reverse()
+      .join("-");
+
+    this.winner = matchItem
+      .querySelector(".match__row.has-won .match__row-title").innerText;
+    this.loser = matchItem
+      .querySelector(".match__row:not(.has-won) .match__row-title")
+      .innerText;
+
+    const playerTwoWon = matchItem
+      .querySelector(".match__row:nth-child(2)")
+      .classList
+      .contains("has-won");
+
+    this.setScores = Array
+      .from(matchItem.querySelectorAll(".match__result .points"))
+      .map((setGameCountList) => {
+        let gameCounts = Array
+          .from(setGameCountList.querySelectorAll(".points__cell"))
+          .map((setGameCountItem) => setGameCountItem.innerText);
+
+        if (playerTwoWon) gameCounts.reverse();
+
+        return gameCounts;
+      });
+
+    this.playerRetired = Array.from(
+      matchItem.querySelectorAll(".match__row .match__message")
+    ).some((messageElement) => messageElement.innerText === "Retired");
+  }
+}
+
 class Group {
   actualMatchCount;
   number;
@@ -50,18 +89,49 @@ class Group {
         return new Player(playerRow);
       })
       .filter((player) => player);
+
+    this.matches = Array
+      .from(
+        loadedGroupNode
+          .querySelectorAll(
+            ".module-container.js-edit-match-index .match-group__item"
+          )
+      )
+      .map((matchItem) => new Match(matchItem));
   }
 
   static async get(groupNode) {
+    //expand group
     groupNode.querySelector("button.collapsed")?.click();
 
-    return new Promise((resolve) => {
+    await new Promise((resolve) => {
       if (groupNode.querySelector(".module-container")) {
-        return resolve(new Group(groupNode));
+        resolve();
       }
 
       const observer = new MutationObserver((_mutations) => {
         if (groupNode.querySelector(".module-container")) {
+          observer.disconnect();
+          resolve();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    });
+
+    // load second page of results
+    groupNode.querySelector(".load-more-btn-container button")?.click();
+
+    return new Promise((resolve) => {
+      if (!groupNode.querySelector(".load-more-btn-container")) {
+        resolve(new Group(groupNode));
+      }
+
+      const observer = new MutationObserver((_mutations) => {
+        if (!groupNode.querySelector(".load-more-btn-container")) {
           observer.disconnect();
           resolve(new Group(groupNode));
         }
@@ -126,6 +196,25 @@ class GroupSeasonTableRowPresenter {
   }
 }
 
+class GroupResultsCsvRowsPresenter {
+  constructor(group) {
+    this.group = group;
+  }
+
+  present() {
+    return this.group.matches.map((match) => {
+      let score = match
+        .setScores
+        .map((gameCounts) => gameCounts.join("-"))
+        .join(" ");
+
+      if (match.playerRetired) { score += " (retired)" }
+
+      return [match.date, this.group.number, match.winner, match.loser, score];
+    });
+  }
+}
+
 let groups;
 
 async function populatedGroups() {
@@ -149,4 +238,16 @@ ${(await populatedGroups()).map((group) => new GroupSeasonTableRowPresenter(grou
 </table>`;
 }
 
+async function resultsCsv() {
+  const csvRows = [["date,group,winner,loser,score"]];
+
+  (await populatedGroups()).forEach((group) => {
+    csvRows.push(...new GroupResultsCsvRowsPresenter(group).present());
+  });
+
+  return csvRows.join("\n");
+}
+
+
 console.log(await seasonTable());
+console.log(await resultsCsv());

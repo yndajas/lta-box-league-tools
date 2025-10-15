@@ -91,7 +91,7 @@ class Group {
 
     this.matches = Array.from(
       loadedGroupNode.querySelectorAll(
-        ".module-container.js-edit-match-index .match-group__item",
+        ".js-edit-match-index > div:first-child .match-group__item",
       ),
     ).map((matchItem) => new Match(matchItem));
   }

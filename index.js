@@ -177,7 +177,7 @@ class GroupSeasonTableRowPresenter {
 			<td><strong>${this.group.number}</strong></td>
 			${this.rankCell(1)}
 			${this.rankCell(2)}
-			<td>${this.actualMatchCount} of ${this.group.maxMatchCount()}${
+			<td>${this.group.actualMatchCount} of ${this.group.maxMatchCount()}${
         this.group.playedAllMatches() ? "&nbsp;😁" : ""
       }</td>
 		</tr>`;

@@ -1,4 +1,4 @@
-# LTA box leage tools
+# LTA box league tools
 
 Running `index.js` in a browser console on a completed box league page
 ([example](https://competitions.lta.org.uk/box-ladder/41263ef5-da77-4645-8a92-7174bb7f3569/event/2/round/6))

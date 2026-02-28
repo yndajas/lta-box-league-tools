@@ -39,7 +39,7 @@ class Match {
     this.setScores = Array.from(
       matchItem.querySelectorAll(".match__result .points"),
     ).map((setGameCountList) => {
-      let gameCounts = Array.from(
+      const gameCounts = Array.from(
         setGameCountList.querySelectorAll(".points__cell"),
       ).map((setGameCountItem) => setGameCountItem.innerText);
 
@@ -143,7 +143,7 @@ class Group {
   static async getAll() {
     return Promise.all(
       Array.from(document.querySelectorAll("div.js-edit-match-group")).map(
-        (groupNode) => this.get(groupNode),
+        (groupNode) => Group.get(groupNode),
       ),
     );
   }

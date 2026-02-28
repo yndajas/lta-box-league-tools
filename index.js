@@ -184,10 +184,18 @@ class GroupSeasonTableRowPresenter {
   }
 
   rankCell(rank) {
+    let innerText;
     const players = this.group.players.filter((player) => player.rank === rank);
-    return `<td>${new Intl.ListFormat("en").format(
-      players.map((player) => this.playerText(player)),
-    )}</td>`;
+
+    if (players[0].matchCount === 0) {
+      innerText = "N/A";
+    } else {
+      innerText = new Intl.ListFormat("en").format(
+        players.map((player) => this.playerText(player)),
+      );
+    }
+
+    return `<td>${innerText}</td>`;
   }
 }
 

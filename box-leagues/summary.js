@@ -2,10 +2,11 @@ class Team {
   constructor(teamRow) {
     this.names = Team.namesFromNavLinkContainer(teamRow);
     this.matchCount = Team.matchCount(teamRow);
-    this.rank = Number.parseInt(
-      teamRow.querySelector(".standing-status").textContent,
-      10,
-    );
+    this.rank =
+      Number.parseInt(
+        teamRow.querySelector(".standing-status").textContent,
+        10,
+      ) || null;
   }
 
   static matchCount(teamRow) {
@@ -194,7 +195,7 @@ class GroupSeasonTableRowPresenter {
     let innerText;
     const teams = this.group.teams.filter((team) => team.rank === rank);
 
-    if (teams[0].matchCount === 0) {
+    if (teams.length === 0 || teams[0].matchCount === 0) {
       innerText = "N/A";
     } else {
       innerText = new Intl.ListFormat("en").format(

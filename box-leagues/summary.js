@@ -1,16 +1,16 @@
-class Player {
-  constructor(playerRow) {
-    this.name = playerRow.querySelector(".nav-link__value").textContent;
-    this.matchCount = Player.matchCount(playerRow);
+class Team {
+  constructor(teamRow) {
+    this.name = teamRow.querySelector(".nav-link__value").textContent;
+    this.matchCount = Team.matchCount(teamRow);
     this.rank = Number.parseInt(
-      playerRow.querySelector(".standing-status").textContent,
+      teamRow.querySelector(".standing-status").textContent,
       10,
     );
   }
 
-  static matchCount(playerRow) {
+  static matchCount(teamRow) {
     return Number.parseInt(
-      playerRow.querySelector(".cell-points").textContent.trim(),
+      teamRow.querySelector(".cell-points").textContent.trim(),
       10,
     );
   }
@@ -32,7 +32,7 @@ class Match {
       ".match__row:not(.has-won) .match__row-title",
     ).innerText;
 
-    const playerTwoWon = matchItem
+    const teamTwoWon = matchItem
       .querySelector(".match__row:nth-child(2)")
       .classList.contains("has-won");
 
@@ -43,12 +43,12 @@ class Match {
         setGameCountList.querySelectorAll(".points__cell"),
       ).map((setGameCountItem) => setGameCountItem.innerText);
 
-      if (playerTwoWon) gameCounts.reverse();
+      if (teamTwoWon) gameCounts.reverse();
 
       return gameCounts;
     });
 
-    this.playerRetired = Array.from(
+    this.teamRetired = Array.from(
       matchItem.querySelectorAll(".match__row .match__message"),
     ).some((messageElement) => messageElement.innerText === "Retired");
   }
@@ -57,7 +57,7 @@ class Match {
 class Group {
   actualMatchCount;
   number;
-  players;
+  teams;
 
   constructor(loadedGroupNode) {
     this.number = Number.parseInt(
@@ -76,18 +76,18 @@ class Group {
       10,
     );
 
-    this.players = Array.from(loadedGroupNode.querySelectorAll("tbody tr"))
-      .map((playerRow) => {
+    this.teams = Array.from(loadedGroupNode.querySelectorAll("tbody tr"))
+      .map((teamRow) => {
         if (
-          playerRow.querySelector('s[title="Withdrawn"]') &&
-          Player.matchCount(playerRow) === 0
+          teamRow.querySelector('s[title="Withdrawn"]') &&
+          Team.matchCount(teamRow) === 0
         ) {
           return null;
         }
 
-        return new Player(playerRow);
+        return new Team(teamRow);
       })
-      .filter((player) => player);
+      .filter((team) => team);
 
     this.matches = Array.from(
       loadedGroupNode.querySelectorAll(
@@ -149,15 +149,15 @@ class Group {
   }
 
   maxMatchCount() {
-    return (this.players.length * (this.players.length - 1)) / 2;
+    return (this.teams.length * (this.teams.length - 1)) / 2;
   }
 
   playedAllMatches() {
     return this.actualMatchCount === this.maxMatchCount();
   }
 
-  playerPlayedAllMatches(player) {
-    return player.matchCount === this.players.length - 1;
+  teamPlayedAllMatches(team) {
+    return team.matchCount === this.teams.length - 1;
   }
 }
 
@@ -166,9 +166,9 @@ class GroupSeasonTableRowPresenter {
     this.group = group;
   }
 
-  playerText(player) {
-    return `${player.name}${
-      this.group.playerPlayedAllMatches(player) ? "&nbsp;👏" : ""
+  teamText(team) {
+    return `${team.name}${
+      this.group.teamPlayedAllMatches(team) ? "&nbsp;👏" : ""
     }`;
   }
 
@@ -185,13 +185,13 @@ class GroupSeasonTableRowPresenter {
 
   rankCell(rank) {
     let innerText;
-    const players = this.group.players.filter((player) => player.rank === rank);
+    const teams = this.group.teams.filter((team) => team.rank === rank);
 
-    if (players[0].matchCount === 0) {
+    if (teams[0].matchCount === 0) {
       innerText = "N/A";
     } else {
       innerText = new Intl.ListFormat("en").format(
-        players.map((player) => this.playerText(player)),
+        teams.map((team) => this.teamText(team)),
       );
     }
 
@@ -210,7 +210,7 @@ class GroupResultsCsvRowsPresenter {
         .map((gameCounts) => gameCounts.join("-"))
         .join(" ");
 
-      if (match.playerRetired) {
+      if (match.teamRetired) {
         score += " (retired)";
       }
 

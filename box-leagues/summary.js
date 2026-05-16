@@ -1,6 +1,6 @@
 class Team {
   constructor(teamRow) {
-    this.name = teamRow.querySelector(".nav-link__value").textContent;
+    this.names = Team.namesFromNavLinkContainer(teamRow);
     this.matchCount = Team.matchCount(teamRow);
     this.rank = Number.parseInt(
       teamRow.querySelector(".standing-status").textContent,
@@ -14,6 +14,13 @@ class Team {
       10,
     );
   }
+
+  static namesFromNavLinkContainer(navLinkContainer) {
+    return Array.from(navLinkContainer.querySelectorAll(".nav-link__value"))
+      .map((playerSpan) => playerSpan.textContent)
+      .sort()
+      .join(" / ");
+  }
 }
 
 class Match {
@@ -25,12 +32,12 @@ class Match {
       .reverse()
       .join("-");
 
-    this.winner = matchItem.querySelector(
-      ".match__row.has-won .match__row-title",
-    ).innerText;
-    this.loser = matchItem.querySelector(
-      ".match__row:not(.has-won) .match__row-title",
-    ).innerText;
+    this.winner = Team.namesFromNavLinkContainer(
+      matchItem.querySelector(".match__row.has-won"),
+    );
+    this.winner = Team.namesFromNavLinkContainer(
+      matchItem.querySelector(".match__row:not(.has-won)"),
+    );
 
     const teamTwoWon = matchItem
       .querySelector(".match__row:nth-child(2)")
@@ -167,7 +174,7 @@ class GroupSeasonTableRowPresenter {
   }
 
   teamText(team) {
-    return `${team.name}${
+    return `${team.names}${
       this.group.teamPlayedAllMatches(team) ? "&nbsp;👏" : ""
     }`;
   }
